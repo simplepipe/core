@@ -6,10 +6,11 @@
 #include <opengl/buffer.h>
 #include <opengl/image.h>
 #include <opengl/shader.h>
-
 #if OS == WEB
 #include <emscripten/emscripten.h>
 #endif
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_opengl.h>
 
 const float vertices[] = {
         // positions          // colors           // texture coords
@@ -35,6 +36,12 @@ struct {
         struct texture *diffuse;
         unsigned loaded : 1;
         unsigned draw : 1;
+
+        void(*update)();
+        void(*render)();
+
+        SDL_Window* window;
+        SDL_GLContext context;
 } game;
 
 static void __init()
@@ -120,14 +127,10 @@ static void __exit()
         ref_dec(&game.diffuse->base);
         ref_dec(&game.pass_main->base);
         ref_dec(&game.pass_custom->base.base);
-}
 
-static void __key(unsigned char key, int x, int y)
-{
-        switch (key) {
-        case 27:
-                exit(0);
-        }
+        SDL_GL_DeleteContext(game.context);
+        SDL_DestroyWindow(game.window);
+        SDL_Quit();
 }
 
 static void __draw()
@@ -166,29 +169,61 @@ static void __draw()
         if(pass->end) {
                 pass->end(pass);
         }
-
-        glutSwapBuffers();
 }
 
 static void __update()
 {
-        if(game.draw) {
-                glutPostRedisplay();
-                game.draw = 0;
-        }
-}
 
+}
 
 static void __load_local()
 {
         if(game.loaded) {
 
-                glGetIntegerv(GL_FRAMEBUFFER_BINDING, &g_device.id_resolved);
+                glGetIntegerv(GL_FRAMEBUFFER_BINDING, (signed *)&g_device.id_resolved);
+
+                printf("%s\n", glGetString(GL_VERSION));
+                printf("%s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
 
                 __init();
-                glutDisplayFunc(__draw);
-                glutIdleFunc(__update);
+                game.update = __update;
+                game.render = __draw;
         }
+}
+
+static void main_tick()
+{
+        SDL_Event event;
+
+        while (SDL_PollEvent(&event)) {
+                if (event.type == SDL_QUIT) exit(0);
+                else if (event.type == SDL_KEYUP &&
+                        event.key.keysym.sym == SDLK_ESCAPE) {
+                                exit(0);
+                }
+        }
+
+        if(game.update) {
+                game.update();
+        }
+        if(game.render && game.draw) {
+                game.render();
+                game.draw = 0;
+        }
+
+        SDL_GL_SwapWindow(game.window);
+}
+
+void main_loop()
+{
+#if __EMSCRIPTEN__
+        emscripten_set_main_loop(main_tick, -1, 1);
+#else
+        while (1)
+        {
+                main_tick();
+        }
+#endif
 }
 
 #if OS == WEB
@@ -198,14 +233,28 @@ void loaded() {
 }
 #endif
 
-int main(int argc, char **argv)
+int main(int args, char **argv)
 {
         atexit(__exit);
+        int i, j;
+        SDL_Init(SDL_INIT_VIDEO);
+
+#if OS != WEB
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+        SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+        SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
+#endif
 
         game.loaded = 1;
         game.draw = 1;
+        game.update = __load_local;
+        game.render = NULL;
         g_device.width = 800;
         g_device.height = 640;
+
 #if OS == WEB
         game.loaded = 0;
         file_web_set_local_path("/test_local");
@@ -219,17 +268,14 @@ int main(int argc, char **argv)
         );
 #endif
 
-        unsigned type;
-        glutInit(&argc, argv);
-        type = GLUT_RGB;
-        type |= GLUT_DOUBLE;
+        SDL_DisplayMode DM;
+        SDL_GetCurrentDisplayMode(0, &DM);
+        game.window = SDL_CreateWindow("Graphic Test", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED,
+                g_device.width, g_device.height, SDL_WINDOW_OPENGL);
+        game.context = SDL_GL_CreateContext(game.window);
+        SDL_SetWindowSize(game.window, g_device.width, g_device.height);
 
-        glutInitDisplayMode(type);
-        glutInitWindowSize(g_device.width, g_device.height);
-        glutCreateWindow("Game");
-        glutKeyboardFunc(__key);
-        glutIdleFunc(__load_local);
-        glutMainLoop();
+        main_loop();
 
         return 0;
 }

@@ -289,7 +289,7 @@ finish:
         ;
 }
 
-static void __block(const char *str, const char **start, const char **end)
+static void __block_find(const char *str, const char **start, const char **end)
 {
         const char *ptr;
         u8 width;
@@ -689,7 +689,7 @@ void xml_node_search(struct xml_node *p, const char *command,
         array_push(result, &p->base);
 
 block:
-        __block(ptr, &start, &end);
+        __block_find(ptr, &start, &end);
         sub = end - start;
 special_case:
         switch (sub) {

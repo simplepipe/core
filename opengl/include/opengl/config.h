@@ -31,9 +31,7 @@
         #define GL_DO_NOT_WARN_IF_MULTI_GL_VERSION_HEADERS_INCLUDED
 
         #include <OpenGL/gl3.h>
-        #include <OpenGL/glu.h>
         #include <OpenGL/glext.h>
-        #include <GLUT/glut.h>
 #elif OS == DROID
         #define GL_GLEXT_PROTOTYPES
         #include <EGL/egl.h>
@@ -48,15 +46,12 @@
         // #define glUnmapBuffer glUnmapBufferOES
 #elif OS == WEB
         #define GL_GLEXT_PROTOTYPES
-        #include <GL/glut.h>
         #include <GL/gl.h>
         #include <GL/glext.h>
 #elif OS == WINDOWS
         #include <GL/glew.h>
-        #include <GL/glut.h>
 #else
         #define GL_GLEXT_PROTOTYPES
-        #include <GL/glut.h>
         #include <GL/gl.h>
         #include <GL/glext.h>
 #endif
