@@ -1,9 +1,9 @@
 # Core guidelines
-* [How atomic reference counting works](how-atomic-reference-counting-works)
-* [How to create an object](how-to-create-an-object)
-* [How to use an object](how-to-use-an-object)
-* [How to build each platform](how-to-build-each-platform)
-* [How to clean each platform](how-to-clean-each-platform)
+* [How atomic reference counting works](#how-atomic-reference-counting-works)
+* [How to create an object](#how-to-create-an-object)
+* [How to use an object](#how-to-use-an-object)
+* [How to build each platform](#how-to-build-each-platform)
+* [How to clean each platform](#how-to-clean-each-platform)
 &NewLine;
 &NewLine;
 #### How atomic reference counting works
