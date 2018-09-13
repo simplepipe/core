@@ -49,30 +49,64 @@ static void __init()
 #define BUFF_SIZE 1024
         char vs[BUFF_SIZE];
         char fs[BUFF_SIZE];
-        unsigned count;
+        char version[20];
+        unsigned count, version_len;
+        const char *ptr;
+        char *str;
 
         game.pass_custom = pass_texture_new(2,
                 g_device.width, g_device.height,
                 1, 1);
         game.pass_main = pass_main_new();
 
-        count = file_to_buffer("inner://res/test.vs", vs, BUFF_SIZE);
-        if(count < BUFF_SIZE) {
-                vs[count] = '\0';
+        ptr = glGetString(GL_VERSION);
+        version[0] = '\0';
+        if(strstr(ptr, "ES")) {
+                strcat(version, "#version 300 es");
+        } else {
+                strcat(version, "#version ");
+                ptr = glGetString(GL_SHADING_LANGUAGE_VERSION);
+                while(*ptr) {
+                        if(*ptr != '.') {
+                                strncat(version, ptr, 1);
+                        }
+                        ptr++;
+                }
         }
-        count = file_to_buffer("inner://res/test.fs", fs, BUFF_SIZE);
+        strcat(version, "\n");
+        version_len = strlen(version);
+
+        vs[0] = '\0';
+        strcat(vs, version);
+        str = vs + version_len;
+        count = file_to_buffer("inner://res/test.vs", str, BUFF_SIZE);
         if(count < BUFF_SIZE) {
-                fs[count] = '\0';
+                str[count] = '\0';
+        }
+
+        fs[0] = '\0';
+        strcat(fs, version);
+        str = fs + version_len;
+        count = file_to_buffer("inner://res/test.fs", str, BUFF_SIZE);
+        if(count < BUFF_SIZE) {
+                str[count] = '\0';
         }
         game.shader = shader_new(vs, fs);
 
-        count = file_to_buffer("inner://res/texture.vs", vs, BUFF_SIZE);
+        vs[0] = '\0';
+        strcat(vs, version);
+        str = vs + version_len;
+        count = file_to_buffer("inner://res/texture.vs", str, BUFF_SIZE);
         if(count < BUFF_SIZE) {
-                vs[count] = '\0';
+                str[count] = '\0';
         }
-        count = file_to_buffer("inner://res/texture.fs", fs, BUFF_SIZE);
+
+        fs[0] = '\0';
+        strcat(fs, version);
+        str = fs + version_len;
+        count = file_to_buffer("inner://res/texture.fs", str, BUFF_SIZE);
         if(count < BUFF_SIZE) {
-                fs[count] = '\0';
+                str[count] = '\0';
         }
         game.shader_normal = shader_new(vs, fs);
 

@@ -1,7 +1,3 @@
-#version 300 es
-
-precision highp float;
-
 layout (location = 0) out vec4 frag_color_red;
 layout (location = 1) out vec4 frag_color_blue;
 
