@@ -1,15 +1,13 @@
-#version 300 es
+#version 100
 
 precision highp float;
 
-layout (location = 0) out vec4 frag_color;
-
-in vec2 texcoord;
-in vec3 color;
+varying vec2 texcoord;
+varying vec3 color;
 
 uniform sampler2D texture_diffuse;
 
 void main()
 {
-        frag_color = texture(texture_diffuse, texcoord) * vec4(color, 1.0);
+        gl_FragColor = texture2D(texture_diffuse, texcoord) * vec4(color, 1.0);
 }

@@ -18,8 +18,8 @@ static struct file_ios *file_ios_init(struct file_ios *p);
 static void file_ios_release(struct file_ios *p);
 static void file_ios_free(const struct ref *ref);
 static void file_ios_write(struct file_ios *p,
-        const char *buf, unsigned len);
-static int file_ios_read(struct file_ios *p, unsigned size,
+        const char *buf, const unsigned len);
+static int file_ios_read(struct file_ios *p, const unsigned size,
         void *buf);
 static NSString *__path_inner(const char *path);
 static NSString * __path_local(const char *path);
@@ -117,12 +117,12 @@ static void file_ios_free(const struct ref *ref)
 }
 
 static void file_ios_write(struct file_ios *p,
-        const char *buf, unsigned len)
+        const char *buf, const unsigned len)
 {
         fwrite(buf, 1, len, p->ptr);
 }
 
-static int file_ios_read(struct file_ios *p, unsigned size,
+static int file_ios_read(struct file_ios *p, const unsigned size,
         void *buf)
 {
         return fread(buf, 1, size, p->ptr);

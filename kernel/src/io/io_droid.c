@@ -39,7 +39,7 @@ static struct file_droid_asset *file_droid_asset_init(
         struct file_droid_asset *p);
 static void file_droid_asset_release(struct file_droid_asset *p);
 static void file_droid_asset_free(const struct ref *ref);
-static int file_droid_asset_read(struct file_droid_asset *p, unsigned size,
+static int file_droid_asset_read(struct file_droid_asset *p, const unsigned size,
         void *buf);
 
 static struct file_droid_asset *file_droid_asset_new(const char *path)
@@ -75,7 +75,7 @@ static void file_droid_asset_free(const struct ref *ref)
         free(p);
 }
 
-static int file_droid_asset_read(struct file_droid_asset *p, unsigned size,
+static int file_droid_asset_read(struct file_droid_asset *p, const unsigned size,
         void *buf)
 {
         return zip_fread(p->ptr, buf, size);
@@ -95,8 +95,8 @@ static struct file_droid_local *file_droid_local_init(struct file_droid_local *p
 static void file_droid_local_release(struct file_droid_local *p);
 static void file_droid_local_free(const struct ref *ref);
 static void file_droid_local_write(struct file_droid_local *p,
-        const char *buf, unsigned len);
-static int file_droid_local_read(struct file_droid_local *p, unsigned size,
+        const char *buf, const unsigned len);
+static int file_droid_local_read(struct file_droid_local *p, const unsigned size,
         void *buf);
 
 static struct file_droid_local *file_droid_local_new(const char *path, char *mode)
@@ -160,12 +160,12 @@ static void file_droid_local_free(const struct ref *ref)
 }
 
 static void file_droid_local_write(struct file_droid_local *p,
-        const char *buf, unsigned len)
+        const char *buf, const unsigned len)
 {
         fwrite(buf, 1, len, p->ptr);
 }
 
-static int file_droid_local_read(struct file_droid_local *p, unsigned size,
+static int file_droid_local_read(struct file_droid_local *p, const unsigned size,
         void *buf)
 {
         return fread(buf, 1, size, p->ptr);

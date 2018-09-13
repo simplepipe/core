@@ -32,8 +32,8 @@ static struct file_web *file_web_init(struct file_web *p);
 static void file_web_release(struct file_web *p);
 static void file_web_free(const struct ref *ref);
 static void file_web_write(struct file_web *p,
-        const char *buf, unsigned len);
-static int file_web_read(struct file_web *p, unsigned size,
+        const char *buf, const unsigned len);
+static int file_web_read(struct file_web *p, const unsigned size,
         void *buf);
 
 struct file *file_open(const char *path, char *mode)
@@ -125,12 +125,12 @@ static void file_web_free(const struct ref *ref)
 }
 
 static void file_web_write(struct file_web *p,
-        const char *buf, unsigned len)
+        const char *buf, const unsigned len)
 {
         fwrite(buf, 1, len, p->ptr);
 }
 
-static int file_web_read(struct file_web *p, unsigned size,
+static int file_web_read(struct file_web *p, const unsigned size,
         void *buf)
 {
         return fread(buf, 1, size, p->ptr);

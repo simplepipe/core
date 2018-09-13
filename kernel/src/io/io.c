@@ -8,14 +8,14 @@ struct file *file_init(struct file *p)
         return p;
 }
 
-void file_write(struct file *p, const char *buf, unsigned len)
+void file_write(struct file *p, const char *buf, const unsigned len)
 {
         if(p->write) {
                 p->write(p, buf, len);
         }
 }
 
-int file_read(struct file *p, unsigned size, void *buf)
+int file_read(struct file *p, const unsigned size, void * const buf)
 {
         if(p->read) {
                 return p->read(p, size, buf);
@@ -39,4 +39,13 @@ struct string *file_to_string(const char *path)
 
         ref_dec(&f->base);
         return p;
+}
+
+unsigned file_to_buffer(const char *path, void * const buf,
+        const unsigned buf_len)
+{
+        struct file *f = file_open(path, "r");
+        unsigned count = file_read(f, buf_len, buf);
+        ref_dec(&f->base);
+        return count;
 }

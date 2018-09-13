@@ -16,8 +16,8 @@ static struct file_pc *file_pc_init(struct file_pc *p);
 static void file_pc_release(struct file_pc *p);
 static void file_pc_free(const struct ref *ref);
 static void file_pc_write(struct file_pc *p,
-        const char *buf, unsigned len);
-static int file_pc_read(struct file_pc *p, unsigned size,
+        const char *buf, const unsigned len);
+static int file_pc_read(struct file_pc *p, const unsigned size,
         void *buf);
 
 struct file *file_open(const char *path, char *mode)
@@ -96,12 +96,12 @@ static void file_pc_free(const struct ref *ref)
 }
 
 static void file_pc_write(struct file_pc *p,
-        const char *buf, unsigned len)
+        const char *buf, const unsigned len)
 {
         fwrite(buf, 1, len, p->ptr);
 }
 
-static int file_pc_read(struct file_pc *p, unsigned size,
+static int file_pc_read(struct file_pc *p, const unsigned size,
         void *buf)
 {
         return fread(buf, 1, size, p->ptr);

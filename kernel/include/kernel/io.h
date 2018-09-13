@@ -26,8 +26,8 @@
 
 struct file;
 
-typedef void(*file_write_delegate)(struct file *, const char *, unsigned);
-typedef int(*file_read_delegate)(struct file *, unsigned, void *);
+typedef void(*file_write_delegate)(struct file *, const char *, const unsigned);
+typedef int(*file_read_delegate)(struct file *, const unsigned, void *);
 
 struct file {
         struct ref base;
@@ -38,9 +38,11 @@ struct file {
 
 struct file *file_init(struct file *p);
 struct file *file_open(const char *path, char *mode);
-void file_write(struct file *p, const char *buf, unsigned len);
-int file_read(struct file *p, unsigned size, void *buf);
+void file_write(struct file *p, const char *buf, const unsigned len);
+int file_read(struct file *p, const unsigned size, void * const buf);
 struct string *file_to_string(const char *path);
+unsigned file_to_buffer(const char *path, void * const buf, 
+        const unsigned buf_len);
 
 #if OS == WEB
 void file_web_set_local_path(const char *path);

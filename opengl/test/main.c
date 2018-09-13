@@ -46,22 +46,35 @@ struct {
 
 static void __init()
 {
+#define BUFF_SIZE 1024
+        char vs[BUFF_SIZE];
+        char fs[BUFF_SIZE];
+        unsigned count;
+
         game.pass_custom = pass_texture_new(2,
                 g_device.width, g_device.height,
                 1, 1);
         game.pass_main = pass_main_new();
 
-        struct string *vs = file_to_string("inner://res/test.vs");
-        struct string *fs = file_to_string("inner://res/test.fs");
-        game.shader = shader_new(vs->ptr, fs->ptr);
-        ref_dec(&vs->base);
-        ref_dec(&fs->base);
+        count = file_to_buffer("inner://res/test.vs", vs, BUFF_SIZE);
+        if(count < BUFF_SIZE) {
+                vs[count] = '\0';
+        }
+        count = file_to_buffer("inner://res/test.fs", fs, BUFF_SIZE);
+        if(count < BUFF_SIZE) {
+                fs[count] = '\0';
+        }
+        game.shader = shader_new(vs, fs);
 
-        vs = file_to_string("inner://res/texture.vs");
-        fs = file_to_string("inner://res/texture.fs");
-        game.shader_normal = shader_new(vs->ptr, fs->ptr);
-        ref_dec(&vs->base);
-        ref_dec(&fs->base);
+        count = file_to_buffer("inner://res/texture.vs", vs, BUFF_SIZE);
+        if(count < BUFF_SIZE) {
+                vs[count] = '\0';
+        }
+        count = file_to_buffer("inner://res/texture.fs", fs, BUFF_SIZE);
+        if(count < BUFF_SIZE) {
+                fs[count] = '\0';
+        }
+        game.shader_normal = shader_new(vs, fs);
 
         game.vao = vao_new();
         game.vbo = vbo_new();
@@ -75,13 +88,10 @@ static void __init()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, game.ebo->id);
         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 
-        // position attribute
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
         glEnableVertexAttribArray(0);
-        // color attribute
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
         glEnableVertexAttribArray(1);
-        // texture coord attribute
         glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(6 * sizeof(float)));
         glEnableVertexAttribArray(2);
 
@@ -181,10 +191,6 @@ static void __load_local()
         if(game.loaded) {
 
                 glGetIntegerv(GL_FRAMEBUFFER_BINDING, (signed *)&g_device.id_resolved);
-
-                printf("%s\n", glGetString(GL_VERSION));
-                printf("%s\n", glGetString(GL_SHADING_LANGUAGE_VERSION));
-
                 __init();
                 game.update = __update;
                 game.render = __draw;
