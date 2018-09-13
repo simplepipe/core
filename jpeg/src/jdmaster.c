@@ -249,7 +249,7 @@ prepare_range_limit_table (j_decompress_ptr cinfo)
     table[i] = (JSAMPLE) i;
   /* End of range limit table: limit[x] = MAXJSAMPLE for x > MAXJSAMPLE */
   for (; i < 3 * (MAXJSAMPLE+1); i++)
-    table[i] = MAXJSAMPLE;
+    table[i] = (JSAMPLE)MAXJSAMPLE;
 }
 
 
