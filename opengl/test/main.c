@@ -13,10 +13,10 @@
 
 const float vertices[] = {
         // positions          // colors           // texture coords
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f, // top right
-        0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f, // bottom right
-        -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f, // bottom left
-        -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f  // top left
+        1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 1.0f, // top right
+        1.0f, -1.0f, 0.0f,   1.0f, 1.0f, 1.0f,   1.0f, 0.0f, // bottom right
+        -1.0f, -1.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 0.0f, // bottom left
+        -1.0f,  1.0f, 0.0f,   1.0f, 1.0f, 1.0f,   0.0f, 1.0f  // top left
 };
 
 const unsigned indices[] = {
@@ -25,7 +25,10 @@ const unsigned indices[] = {
 };
 
 struct {
+        struct pass_texture *pass_custom;
+        struct pass *pass_main;
         struct shader *shader;
+        struct shader *shader_normal;
         struct vbo *vbo;
         struct vbo *ebo;
         struct vao *vao;
@@ -36,9 +39,20 @@ struct {
 
 static void __init()
 {
-        struct string *vs = file_to_string("inner://res/texture.vs");
-        struct string *fs = file_to_string("inner://res/texture.fs");
+        game.pass_custom = pass_texture_new(2,
+                g_device.width, g_device.height,
+                1, 1);
+        game.pass_main = pass_main_new();
+
+        struct string *vs = file_to_string("inner://res/test.vs");
+        struct string *fs = file_to_string("inner://res/test.fs");
         game.shader = shader_new(vs->ptr, fs->ptr);
+        ref_dec(&vs->base);
+        ref_dec(&fs->base);
+
+        vs = file_to_string("inner://res/texture.vs");
+        fs = file_to_string("inner://res/texture.fs");
+        game.shader_normal = shader_new(vs->ptr, fs->ptr);
         ref_dec(&vs->base);
         ref_dec(&fs->base);
 
@@ -99,10 +113,13 @@ static void __init()
 static void __exit()
 {
         ref_dec(&game.shader->base);
+        ref_dec(&game.shader_normal->base);
         ref_dec(&game.vbo->base);
         ref_dec(&game.vao->base);
         ref_dec(&game.ebo->base);
         ref_dec(&game.diffuse->base);
+        ref_dec(&game.pass_main->base);
+        ref_dec(&game.pass_custom->base.base);
 }
 
 static void __key(unsigned char key, int x, int y)
@@ -115,6 +132,11 @@ static void __key(unsigned char key, int x, int y)
 
 static void __draw()
 {
+        struct pass *pass = &game.pass_custom->base;
+
+        if(pass->begin) {
+                pass->begin(pass);
+        }
         glClearColor(0.0, 0.0, 0.0, 1.0);
         glClear(GL_COLOR_BUFFER_BIT);
 
@@ -122,6 +144,28 @@ static void __draw()
         glBindTexture(GL_TEXTURE_2D, game.diffuse->id);
         glBindVertexArray(game.vao->id);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        if(pass->end) {
+                pass->end(pass);
+        }
+
+        pass = game.pass_main;
+
+        if(pass->begin) {
+                pass->begin(pass);
+        }
+        glClearColor(0.0, 0.0, 0.0, 1.0);
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glUseProgram(game.shader_normal->id);
+        struct texture *tex = cast(array_get(game.pass_custom->textures, 0), struct texture, base);
+        glBindTexture(GL_TEXTURE_2D, tex->id);
+        glBindVertexArray(game.vao->id);
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+
+        if(pass->end) {
+                pass->end(pass);
+        }
 
         glutSwapBuffers();
 }
@@ -138,6 +182,9 @@ static void __update()
 static void __load_local()
 {
         if(game.loaded) {
+
+                glGetIntegerv(GL_FRAMEBUFFER_BINDING, &g_device.id_resolved);
+
                 __init();
                 glutDisplayFunc(__draw);
                 glutIdleFunc(__update);
@@ -157,6 +204,8 @@ int main(int argc, char **argv)
 
         game.loaded = 1;
         game.draw = 1;
+        g_device.width = 800;
+        g_device.height = 640;
 #if OS == WEB
         game.loaded = 0;
         file_web_set_local_path("/test_local");
@@ -176,7 +225,7 @@ int main(int argc, char **argv)
         type |= GLUT_DOUBLE;
 
         glutInitDisplayMode(type);
-        glutInitWindowSize(800, 640);
+        glutInitWindowSize(g_device.width, g_device.height);
         glutCreateWindow("Game");
         glutKeyboardFunc(__key);
         glutIdleFunc(__load_local);
