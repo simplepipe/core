@@ -54,7 +54,7 @@ static void __init()
         const char *ptr;
         char *str;
 
-        game.pass_custom = pass_texture_new(2,
+        game.pass_custom = pass_texture_new_msaa(3,
                 g_device.width, g_device.height,
                 1, 1);
         game.pass_main = pass_main_new();
@@ -86,7 +86,8 @@ static void __init()
 
         fs[0] = '\0';
         strcat(fs, version);
-        str = fs + version_len;
+        strcat(fs, "precision highp float;\n");
+        str = fs + version_len + sizeof("precision highp float;\n") - 1;
         count = file_to_buffer("inner://res/test.fs", str, BUFF_SIZE);
         if(count < BUFF_SIZE) {
                 str[count] = '\0';
@@ -103,7 +104,8 @@ static void __init()
 
         fs[0] = '\0';
         strcat(fs, version);
-        str = fs + version_len;
+        strcat(fs, "precision highp float;\n");
+        str = fs + version_len + sizeof("precision highp float;\n") - 1;
         count = file_to_buffer("inner://res/texture.fs", str, BUFF_SIZE);
         if(count < BUFF_SIZE) {
                 str[count] = '\0';
@@ -205,7 +207,7 @@ static void __draw()
         glClear(GL_COLOR_BUFFER_BIT);
 
         glUseProgram(game.shader_normal->id);
-        struct texture *tex = cast(array_get(game.pass_custom->textures, 0), struct texture, base);
+        struct texture *tex = cast(array_get(game.pass_custom->textures, 1), struct texture, base);
         glBindTexture(GL_TEXTURE_2D, tex->id);
         glBindVertexArray(game.vao->id);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -287,7 +289,6 @@ int main(int args, char **argv)
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
         SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 8);
 #endif
-
         game.loaded = 1;
         game.draw = 1;
         game.update = __load_local;

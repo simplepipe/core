@@ -1,24 +1,21 @@
-#include <kernel/platform.h>
-
-#if OS == OSX
 #include <stdlib.h>
 #include <opengl/pass.h>
 
-struct pass_texture_osx {
+struct pass_texture_msaa {
         struct pass_texture base;
 
         unsigned *render_buffers_sampled;
         unsigned render_buffers_len;
 };
 
-static void __pass_texture_osx_free(const struct ref *ref);
-static struct pass_texture_osx *__pass_texture_osx_init(
-        struct pass_texture_osx *p, const unsigned len,
+static void __pass_texture_msaa_free(const struct ref *ref);
+static struct pass_texture_msaa *__pass_texture_msaa_init(
+        struct pass_texture_msaa *p, const unsigned len,
         const unsigned width, const unsigned height,
         const unsigned depth, const unsigned stencil,
         const unsigned msaa);
-static void __pass_texture_osx_release(struct pass_texture_osx *p);
-static void __pass_texture_osx_end(struct pass *p);
+static void __pass_texture_msaa_release(struct pass_texture_msaa *p);
+static void __pass_texture_msaa_end(struct pass *p);
 
 struct pass_texture *pass_texture_new_msaa(const unsigned len,
         const unsigned width, const unsigned height,
@@ -30,15 +27,15 @@ struct pass_texture *pass_texture_new_msaa(const unsigned len,
 
         struct pass *p;
         struct pass_texture *pt;
-        struct pass_texture_osx *pl;
+        struct pass_texture_msaa *pl;
 
         signed samples;
         glGetIntegerv(GL_MAX_SAMPLES, &samples);
         if(samples == 0) {
                 pt = pass_texture_new(len, width, height, depth, stencil);
         } else {
-                pl = __pass_texture_osx_init(
-                        malloc(sizeof(struct pass_texture_osx)),
+                pl = __pass_texture_msaa_init(
+                        malloc(sizeof(struct pass_texture_msaa)),
                         len, width, height, depth, stencil, 1);
                 pt = &pl->base;
                 p = &pt->base;
@@ -70,7 +67,7 @@ struct pass_texture *pass_texture_new_msaa(const unsigned len,
                 glDrawBuffers(len, attachments);
 
                 if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-                        __pass_texture_osx_release(pl);
+                        __pass_texture_msaa_release(pl);
                         pass_texture_release(pt);
                         pass_release(p);
                         goto finish;
@@ -96,7 +93,7 @@ struct pass_texture *pass_texture_new_msaa(const unsigned len,
                 glDrawBuffers(len, attachments);
 
                 if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-                        __pass_texture_osx_release(pl);
+                        __pass_texture_msaa_release(pl);
                         pass_texture_release(pt);
                         pass_release(p);
                         goto finish;
@@ -108,21 +105,21 @@ finish:
         return pt;
 }
 
-struct pass_texture_osx *__pass_texture_osx_init(
-        struct pass_texture_osx *p, const unsigned len,
+struct pass_texture_msaa *__pass_texture_msaa_init(
+        struct pass_texture_msaa *p, const unsigned len,
         const unsigned width, const unsigned height,
         const unsigned depth, const unsigned stencil,
         const unsigned msaa)
 {
         pass_texture_init(&p->base, len, width, height, depth, stencil, msaa);
-        p->base.base.base = (struct ref){__pass_texture_osx_free, 1};
+        p->base.base.base = (struct ref){__pass_texture_msaa_free, 1};
         p->render_buffers_sampled = calloc(len, sizeof(unsigned));
         p->render_buffers_len = len;
-        p->base.base.end = __pass_texture_osx_end;
+        p->base.base.end = __pass_texture_msaa_end;
         return p;
 }
 
-void __pass_texture_osx_release(struct pass_texture_osx *p)
+void __pass_texture_msaa_release(struct pass_texture_msaa *p)
 {
         if(p->render_buffers_sampled) {
                 glDeleteRenderbuffers(p->render_buffers_len,
@@ -132,40 +129,43 @@ void __pass_texture_osx_release(struct pass_texture_osx *p)
         }
 }
 
-static void __pass_texture_osx_free(const struct ref *ref)
+static void __pass_texture_msaa_free(const struct ref *ref)
 {
         struct pass *p = cast(ref, struct pass, base);
         struct pass_texture *pt = cast(p, struct pass_texture, base);
-        struct pass_texture_osx *ptl =
-                cast(pt, struct pass_texture_osx, base);
+        struct pass_texture_msaa *ptl =
+                cast(pt, struct pass_texture_msaa, base);
 
-        __pass_texture_osx_release(ptl);
+        __pass_texture_msaa_release(ptl);
         pass_texture_release(pt);
         pass_release(p);
 
         free(ptl);
 }
 
-static void __pass_texture_osx_end(struct pass *p)
+static void __pass_texture_msaa_end(struct pass *p)
 {
         unsigned i;
         struct pass_texture *pt;
+        unsigned draw[32] = {GL_NONE};
 
         pt = cast(p, struct pass_texture, base);
 
         glBindFramebuffer(GL_READ_FRAMEBUFFER, p->id_sampled);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, p->id_resolved);
+
         for(i = 0 ; i < pt->textures->len; i++)
 	{
-		glReadBuffer(GL_COLOR_ATTACHMENT0 + i);
-		glDrawBuffer(GL_COLOR_ATTACHMENT0 + i);
+                draw[i] = GL_COLOR_ATTACHMENT0 + i;
+		glReadBuffer(draw[i]);
+                glDrawBuffers(pt->textures->len, draw);
 		glBlitFramebuffer(
                         0, 0, p->width, p->height,
                         0, 0, p->width, p->height,
                         GL_COLOR_BUFFER_BIT, GL_NEAREST);
+                draw[i] = GL_NONE;
 	}
+
         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
 }
-
-#endif
