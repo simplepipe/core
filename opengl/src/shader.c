@@ -24,7 +24,7 @@ struct shader *shader_init(struct shader *p,
         glGetShaderiv(vs, GL_COMPILE_STATUS, &r);
         if(!r) {
                 glGetShaderInfoLog(vs, 512, NULL, info);
-                printf("vertex shader error:\n%s\n", info);
+                debug("vertex shader error:\n%s\n", info);
                 glDeleteShader(vs);
                 goto finish;
         }
@@ -35,7 +35,7 @@ struct shader *shader_init(struct shader *p,
         glGetShaderiv(fs, GL_COMPILE_STATUS, &r);
         if(!r) {
                 glGetShaderInfoLog(fs, 512, NULL, info);
-                printf("fragment shader error:\n%s\n", info);
+                debug("fragment shader error:\n%s\n", info);
                 glDeleteShader(vs);
                 glDeleteShader(fs);
                 goto finish;
