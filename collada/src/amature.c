@@ -13,14 +13,14 @@ struct dae_amature *dae_amature_init(struct dae_amature *p)
         p->base = (struct ref){__dae_amature_free, 1};
         mat4_set_identity(&p->transform);
         p->bones = hash_table_new();
-        p->name = string_new();
+        p->id = string_new();
         return p;
 }
 
 void dae_amature_release(struct dae_amature *p)
 {
         ref_dec(&p->bones->base);
-        ref_dec(&p->name->base);
+        ref_dec(&p->id->base);
 }
 
 static void __dae_amature_free(const struct ref *ref)

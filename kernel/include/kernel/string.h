@@ -18,7 +18,8 @@ struct string *string_new();
 struct string *string_init(struct string *p);
 void string_release(struct string *p);
 
-struct string *string_cat_chars(struct string *p, char *s, unsigned s_len);
+struct string *string_cat_chars(struct string *p, const char *s,
+        const unsigned s_len);
 
 void string_trim_utf8(struct string *p);
 
@@ -39,7 +40,7 @@ struct string *string_cat(struct string *p,
  */
 struct string_cat_parameter_chars {
         struct string_cat_parameter base;
-        char *ptr;
+        const char *ptr;
         unsigned len;
 };
 

@@ -16,6 +16,9 @@ struct dae_bone {
 
         struct string *id;
         struct string *sid;
+
+        struct float_array *animation_times;
+        struct float_array *animation_transforms;
 };
 
 struct dae_bone *dae_bone_new();

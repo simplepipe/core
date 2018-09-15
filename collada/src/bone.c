@@ -15,6 +15,8 @@ struct dae_bone *dae_bone_init(struct dae_bone *p)
         p->parent = NULL;
         p->id = string_new();
         p->sid = string_new();
+        p->animation_times = NULL;
+        p->animation_transforms = NULL;
         mat4_set_identity(&p->transform);
         mat4_set_identity(&p->transform_relative);
         return p;
@@ -25,6 +27,12 @@ void dae_bone_release(struct dae_bone *p)
         ref_dec(&p->children->base);
         ref_dec(&p->id->base);
         ref_dec(&p->sid->base);
+        if(p->animation_times) {
+                ref_dec(&p->animation_times->base);
+        }
+        if(p->animation_transforms) {
+                ref_dec(&p->animation_transforms->base);
+        }
 }
 
 static void __dae_bone_free(const struct ref *ref)

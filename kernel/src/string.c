@@ -72,7 +72,7 @@ void string_trim_utf8(struct string *p)
 }
 
 struct string *string_cat_chars(struct string *p,
-        char *s, unsigned s_len)
+        const char *s, const unsigned s_len)
 {
         p->ptr = p->realloc(p->ptr, p->len + s_len + 1);
         memcpy(p->ptr + p->len, s, s_len);

@@ -13,7 +13,7 @@ struct dae_amature {
 
         struct hash_table *bones;
 
-        struct string *name;
+        struct string *id;
 };
 
 struct dae_amature *dae_amature_new();

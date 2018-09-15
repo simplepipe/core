@@ -15,10 +15,10 @@ struct dae_skin *dae_skin_init(struct dae_skin *p)
         p->normals = NULL;
         p->texcoords = NULL;
         p->colors = NULL;
-        p->bones_id = NULL;
-        p->weights = NULL;
-        p->inverse_bind_poses = NULL;
-        p->bone_names = NULL;
+        p->bones_id = float_array_new();
+        p->weights = float_array_new();
+        p->inverse_bind_poses = float_array_new();
+        p->bone_names = array_new(1);
         p->id = string_new();
         p->bones_per_vertex = 0;
         p->bones_upload = 0;

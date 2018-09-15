@@ -70,7 +70,7 @@ struct xml_attribute *xml_attribute_new_mask(
         return xml_attribute_init_mask(malloc(sizeof(struct xml_attribute)),
                 name, name_len, value, value_len);
 }
-
+#include <stdio.h>
 static struct xml_attribute *xml_attribute_init_mask(struct xml_attribute *p,
         const char *name, const unsigned name_len,
         const char *value, const unsigned value_len)

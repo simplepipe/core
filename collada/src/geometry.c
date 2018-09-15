@@ -15,6 +15,7 @@ struct dae_geometry *dae_geometry_init(struct dae_geometry *p)
         p->normals = NULL;
         p->texcoords = NULL;
         p->colors = NULL;
+        p->vertices_indexes = NULL;
         p->id = string_new();
         return p;
 }
@@ -32,6 +33,7 @@ void dae_geometry_release(struct dae_geometry *p)
         DEC(p->normals);
         DEC(p->texcoords);
         DEC(p->colors);
+        DEC(p->vertices_indexes);
 
 #undef DEC
 }
