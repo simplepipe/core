@@ -4,6 +4,7 @@
 #include <math/math.h>
 #include <kernel/array.h>
 #include <kernel/string.h>
+#include <collada/float_array.h>
 
 struct dae_bone {
         struct ref base;

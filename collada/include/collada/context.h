@@ -7,7 +7,7 @@
 #include <collada/amature.h>
 #include <collada/node.h>
 
-struct collada_context {
+struct dae_context {
         struct ref base;
 
         struct hash_table *geometries;
@@ -16,10 +16,10 @@ struct collada_context {
         struct hash_table *nodes;
 };
 
-struct collada_context *collada_context_new();
-struct collada_context *collada_context_init(struct collada_context *p);
-void collada_context_release(struct collada_context *p);
+struct dae_context *dae_context_new();
+struct dae_context *dae_context_init(struct dae_context *p);
+void dae_context_release(struct dae_context *p);
 
-void collada_context_parse(struct collada_context *p, const char *file);
+void dae_context_parse(struct dae_context *p, const char *file);
 
 #endif

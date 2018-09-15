@@ -1,16 +1,16 @@
 #include <stdlib.h>
 #include <collada/context.h>
 
-static void __collada_context_free(const struct ref *ref);
+static void __dae_context_free(const struct ref *ref);
 
-struct collada_context *collada_context_new()
+struct dae_context *dae_context_new()
 {
-        return collada_context_init(malloc(sizeof(struct collada_context)));
+        return dae_context_init(malloc(sizeof(struct dae_context)));
 }
 
-struct collada_context *collada_context_init(struct collada_context *p)
+struct dae_context *dae_context_init(struct dae_context *p)
 {
-        p->base = (struct ref){__collada_context_free, 1};
+        p->base = (struct ref){__dae_context_free, 1};
         p->geometries = hash_table_new();
         p->skines = hash_table_new();
         p->amatures = hash_table_new();
@@ -18,7 +18,7 @@ struct collada_context *collada_context_init(struct collada_context *p)
         return p;
 }
 
-void collada_context_release(struct collada_context *p)
+void dae_context_release(struct dae_context *p)
 {
 #define DEC(v) \
         if(v) {\
@@ -34,9 +34,9 @@ void collada_context_release(struct collada_context *p)
 #undef DEC
 }
 
-static void __collada_context_free(const struct ref *ref)
+static void __dae_context_free(const struct ref *ref)
 {
-        struct collada_context *p = cast(ref, struct collada_context, base);
-        collada_context_release(p);
+        struct dae_context *p = cast(ref, struct dae_context, base);
+        dae_context_release(p);
         free(p);
 }

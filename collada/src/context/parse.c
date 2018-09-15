@@ -32,7 +32,7 @@ end:
         ;
 }
 
-static void __parse_geometry(struct collada_context *p,
+static void __parse_geometry(struct dae_context *p,
         struct xml_node *xn_geometry)
 {
         struct dae_geometry *geometry = dae_geometry_new();
@@ -200,7 +200,7 @@ static void __parse_geometry(struct collada_context *p,
         ref_dec(&colors->base);
 }
 
-static void __parse_library_geometries(struct collada_context *p,
+static void __parse_library_geometries(struct dae_context *p,
         struct xml_node *xn)
 {
         struct array *geometries = array_new(1);
@@ -215,7 +215,7 @@ static void __parse_library_geometries(struct collada_context *p,
         ref_dec(&geometries->base);
 }
 
-static void __parse_controller(struct collada_context *p,
+static void __parse_controller(struct dae_context *p,
         struct xml_node *xn_controller)
 {
         struct dae_skin *skin = dae_skin_new();
@@ -383,7 +383,7 @@ static void __parse_controller(struct collada_context *p,
         ref_dec(&v_weights->base);
 }
 
-static void __parse_library_controllers(struct collada_context *p,
+static void __parse_library_controllers(struct dae_context *p,
         struct xml_node *xn)
 {
         struct array *controllers = array_new(1);
@@ -436,7 +436,7 @@ static struct dae_bone *__parse_bone(struct dae_amature *p, struct xml_node *xn)
         return bone;
 }
 
-static void __parse_node_amature(struct collada_context *p,
+static void __parse_node_amature(struct dae_context *p,
         struct xml_node *xn_node)
 {
         struct dae_amature *amature = dae_amature_new();
@@ -470,7 +470,7 @@ static void __parse_node_amature(struct collada_context *p,
         ref_dec(&searchs->base);
 }
 
-static struct dae_node *__parse_node_visual(struct collada_context *p,
+static struct dae_node *__parse_node_visual(struct dae_context *p,
         struct xml_node *xn_node)
 {
         struct dae_node *node = dae_node_new(), *node_c;
@@ -550,7 +550,7 @@ static struct dae_node *__parse_node_visual(struct collada_context *p,
         return node;
 }
 
-static void __parse_visual_scene(struct collada_context *p,
+static void __parse_visual_scene(struct dae_context *p,
         struct xml_node *xn_visual_scene)
 {
         struct array    *searchs = array_new(1),
@@ -573,7 +573,7 @@ static void __parse_visual_scene(struct collada_context *p,
         ref_dec(&searchs_sub->base);
 }
 
-static void __parse_library_visual_scenes(struct collada_context *p,
+static void __parse_library_visual_scenes(struct dae_context *p,
         struct xml_node *xn)
 {
         struct array *searchs = array_new(1);
@@ -589,12 +589,76 @@ static void __parse_library_visual_scenes(struct collada_context *p,
         ref_dec(&searchs->base);
 }
 
-static void __parse_animation(struct collada_context *p, struct xml_node *xn)
+static struct dae_bone *__animation_get_bone(struct dae_context *p,
+        const char *key, const unsigned key_len)
 {
-        
+        struct dae_bone *bone = NULL;
+        struct list_head *head;
+        struct dae_amature *amature;
+
+        head = hash_table_get_iterator(p->amatures);
+next_amature:
+        amature = cast_null(hash_table_iterator_next(p->amatures, &head),
+                struct dae_amature, base);
+        if(amature) {
+                bone = cast_null(hash_table_get(amature->bones, key, key_len),
+                        struct dae_bone, base);
+                if(bone) goto finish;
+                goto next_amature;
+        }
+
+finish:
+        return bone;
 }
 
-static void __parse_library_animations(struct collada_context *p,
+static void __parse_animation(struct dae_context *p, struct xml_node *xn)
+{
+        struct array *searchs = array_new(1);
+        struct xml_node *xn_float_array, *xn_time;
+        struct xml_attribute *attr_count, *attr_target;
+        unsigned count;
+        const char *start, *end;
+        struct dae_bone *bone;
+        struct float_array *fa;
+        unsigned  i;
+
+        xml_node_search(xn, "//channel/@target", searchs);
+        attr_target = cast(array_get(searchs, 0), struct xml_attribute, base);
+        start = attr_target->value;
+        end = strchr(start, '/');
+        bone = __animation_get_bone(p, start, end - start);
+        if(!bone) goto finish;
+
+        xml_node_search(xn, "//param[@name=\"TRANSFORM\"]/../../../float_array",
+                searchs);
+        xn_float_array = cast(array_get(searchs, 0), struct xml_node, base);
+        attr_count = xml_node_get_attribute(xn_float_array, KEYSIZE_L("count"));
+        count = atoi(attr_count->value);
+        fa = float_array_new();
+        float_array_reserve(fa, count);
+        float_array_add_string(fa, xn_float_array->value);
+        for(i = 0; i < fa->len; i += 16) {
+                mat4_transpose((union mat4 *)(fa->ptr + i));
+        }
+        float_array_assign(&bone->animation_transforms, fa);
+        ref_dec(&fa->base);
+
+        xml_node_search(xn, "//param[@name=\"TIME\"]/../../../float_array",
+                searchs);
+        xn_float_array = cast(array_get(searchs, 0), struct xml_node, base);
+        attr_count = xml_node_get_attribute(xn_float_array, KEYSIZE_L("count"));
+        count = atoi(attr_count->value);
+        fa = float_array_new();
+        float_array_reserve(fa, count);
+        float_array_add_string(fa, xn_float_array->value);
+        float_array_assign(&bone->animation_times, fa);
+        ref_dec(&fa->base);
+
+finish:
+        ref_dec(&searchs->base);
+}
+
+static void __parse_library_animations(struct dae_context *p,
         struct xml_node *xn)
 {
         struct array *searchs = array_new(1);
@@ -610,7 +674,7 @@ static void __parse_library_animations(struct collada_context *p,
         ref_dec(&searchs->base);
 }
 
-void collada_context_parse(struct collada_context *p, const char *file)
+void dae_context_parse(struct dae_context *p, const char *file)
 {
         struct xml_context *ctx = xml_context_new();
         xml_context_parse(ctx, file);
