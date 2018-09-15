@@ -132,3 +132,14 @@ void array_clear(struct array *p)
         }
         p->len = 0;
 }
+
+void array_assign(struct array **p, struct array *a)
+{
+        if(a) {
+                ref_inc(&a->base);
+        }
+        if(*p) {
+                ref_dec(&(*p)->base);
+        }
+        *p = a;
+}

@@ -25,5 +25,5 @@ void array_set(struct array *p, struct ref *ref, const int id);
 void array_reserve(struct array *p, const unsigned len);
 void array_truncate(struct array *p);
 void array_swap(struct array *p, struct array *q);
-
+void array_assign(struct array **p, struct array *a);
 #endif

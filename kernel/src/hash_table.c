@@ -314,3 +314,14 @@ struct ref *hash_table_iterator_next(struct hash_table *p, struct list_head **pi
         }
         return ref;
 }
+
+void hash_table_assign(struct hash_table **p, struct hash_table *a)
+{
+        if(a) {
+                ref_inc(&a->base);
+        }
+        if(*p) {
+                ref_dec(&(*p)->base);
+        }
+        *p = a;
+}
