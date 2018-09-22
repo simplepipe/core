@@ -315,6 +315,26 @@ struct ref *hash_table_iterator_next(struct hash_table *p, struct list_head **pi
         return ref;
 }
 
+void hash_table_iterator_next_value_key(struct hash_table *p, struct list_head **pit,
+	struct ref **ref, const char **key, unsigned *key_len)
+{
+        struct list_head *it = *pit;
+        struct cell *c;
+
+        if(it != &p->iterators) {
+        	c = cast(it, struct cell, head_iterator);
+                *ref = c->ref;
+                *key = c->key;
+                *key_len = c->key_len;
+                
+                *pit = it->next;
+        } else {
+        	*ref = NULL;
+        	*key_len = 0;
+        	*key = NULL;
+        }
+}
+
 void hash_table_assign(struct hash_table **p, struct hash_table *a)
 {
         if(a) {

@@ -26,6 +26,8 @@ void hash_table_remove(struct hash_table *p, const void *key,
 
 struct list_head *hash_table_get_iterator(struct hash_table *p);
 struct ref *hash_table_iterator_next(struct hash_table *p, struct list_head **it);
+void hash_table_iterator_next_value_key(struct hash_table *p, struct list_head **it,
+	struct ref **ref, const char **key, unsigned *key_len);
 
 void hash_table_assign(struct hash_table **p, struct hash_table *a);
 

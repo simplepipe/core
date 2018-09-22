@@ -256,4 +256,27 @@ string_cat_parameter_u64_cat(struct string_cat_parameter_u64 *p,
         .num = n\
 }
 
+/*
+ * cat double
+ */
+struct string_cat_parameter_double {
+        struct string_cat_parameter base;
+        double num;
+};
+
+static inline void
+string_cat_parameter_double_cat(struct string_cat_parameter_double *p,
+        struct string *s)
+{
+        char var[128];
+        unsigned len = sprintf(var, "%f", p->num);
+        string_cat_chars(s, var, len);
+}
+
+#define STRING_CAT_DOUBLE(n) (struct string_cat_parameter *)\
+&(struct string_cat_parameter_double){\
+        .base.cat = (string_cat_parameter_cat) string_cat_parameter_double_cat,\
+        .num = n\
+}
+
 #endif

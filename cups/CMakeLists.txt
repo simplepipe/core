@@ -1,0 +1,48 @@
+cmake_minimum_required(VERSION 2.8.9)
+project (cups C)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+    set(CMAKE_C_COMPILER "emcc")
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_ZLIB=1")
+    set(LIBRARY_INPUT "${CMAKE_INSTALL_PREFIX}")
+else()
+        if (${CMAKE_GENERATOR} MATCHES Xcode)
+                set(LIBRARY_INPUT[variant=Debug] "${IOS_LIBRARY_PREIX}/debug")
+                set(LIBRARY_INPUT[variant=Release] "${IOS_LIBRARY_PREIX}/release")
+                set(LIBRARY_INPUT[variant=MinSizeRel] "${IOS_LIBRARY_PREIX}/release")
+                set(LIBRARY_INPUT[variant=RelWithDebInfo] "${IOS_LIBRARY_PREIX}/release")
+        else()
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Werror -Wno-unused-result")
+                set(LIBRARY_INPUT "${CMAKE_INSTALL_PREFIX}")
+        endif()
+endif()
+
+include_directories(include)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+    file(GLOB_RECURSE SOURCES "src/*.c" "src/*.m")
+else()
+    file(GLOB_RECURSE SOURCES "src/*.c")
+endif()
+
+add_library(cups STATIC ${SOURCES})
+target_link_libraries(cups pthread z m)
+
+if(${CMAKE_BUILD_TYPE} MATCHES "Release" AND ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+        add_custom_command(
+                TARGET cups
+                POST_BUILD
+                COMMAND ${ANDROID_TOOLCHAIN_PREFIX}strip libcups.a
+        )
+endif()
+
+install (TARGETS cups
+         ARCHIVE DESTINATION .)
+
+ if(NOT ${CMAKE_GENERATOR} MATCHES Xcode
+        AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android"
+        AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+        add_executable(test "test/main.c")
+        add_dependencies(test cups pthread z m)
+        target_link_libraries(test cups pthread z m)
+endif()

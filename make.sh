@@ -7,9 +7,11 @@ BUILD[2]=jpeg
 BUILD[3]=math
 BUILD[4]=kernel
 BUILD[5]=xml
-BUILD[6]=collada
-BUILD[7]=action
-BUILD[8]=opengl
+BUILD[6]=json
+BUILD[7]=collada
+BUILD[8]=action
+BUILD[9]=opengl
+BUILD[10]=gui
 
 for i in "${BUILD[@]}"
 do

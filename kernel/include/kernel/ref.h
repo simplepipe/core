@@ -27,6 +27,6 @@ ref_dec(const struct ref *ref)
     ((type *) ((char *)(ptr) - offsetof(type, member)))
 
 #define cast_null(ptr, type, member) \
-        ((type *) (ptr ? ((char *)(ptr) - offsetof(type, member)) : NULL))
+        ((type *) ((ptr) ? ((char *)(ptr) - offsetof(type, member)) : NULL))
 
 #endif
