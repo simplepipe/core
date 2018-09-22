@@ -2,6 +2,7 @@
 #define __kernel_string_h
 
 #include <stdio.h>
+#include <locale.h>
 #include <kernel/def.h>
 #include <kernel/ref.h>
 
@@ -147,6 +148,7 @@ string_cat_parameter_i16_cat(struct string_cat_parameter_i16 *p,
 struct string_cat_parameter_u16 {
         struct string_cat_parameter base;
         u16 num;
+        unsigned fixed;
 };
 
 static inline void
@@ -162,6 +164,24 @@ string_cat_parameter_u16_cat(struct string_cat_parameter_u16 *p,
 &(struct string_cat_parameter_u16){\
         .base.cat = (string_cat_parameter_cat) string_cat_parameter_u16_cat,\
         .num = n\
+}
+
+static inline void
+string_cat_parameter_u16_cat_fixed(struct string_cat_parameter_u16 *p,
+        struct string *s)
+{
+        char var[6];
+        char format[10];
+        sprintf(format, "%c0%uu", '%', p->fixed);
+        unsigned len = sprintf(var, format, p->num);
+        string_cat_chars(s, var, len);
+}
+
+#define STRING_CAT_U16_FIXED(n, f) (struct string_cat_parameter *)\
+&(struct string_cat_parameter_u16){\
+        .base.cat = (string_cat_parameter_cat) string_cat_parameter_u16_cat_fixed,\
+        .num = n,\
+        .fixed = f\
 }
 
 /*
@@ -250,9 +270,26 @@ string_cat_parameter_u64_cat(struct string_cat_parameter_u64 *p,
         string_cat_chars(s, var, len);
 }
 
+
 #define STRING_CAT_U64(n) (struct string_cat_parameter *)\
 &(struct string_cat_parameter_u64){\
         .base.cat = (string_cat_parameter_cat) string_cat_parameter_u64_cat,\
+        .num = n\
+}
+
+static inline void
+string_cat_parameter_u64_cat_dot(struct string_cat_parameter_u64 *p,
+        struct string *s)
+{
+        char var[21];
+        setlocale(LC_NUMERIC, "");
+        unsigned len = sprintf(var, "%'"PRIu64, p->num);
+        string_cat_chars(s, var, len);
+}
+
+#define STRING_CAT_U64_DOT(n) (struct string_cat_parameter *)\
+&(struct string_cat_parameter_u64){\
+        .base.cat = (string_cat_parameter_cat) string_cat_parameter_u64_cat_dot,\
         .num = n\
 }
 
@@ -262,6 +299,7 @@ string_cat_parameter_u64_cat(struct string_cat_parameter_u64 *p,
 struct string_cat_parameter_double {
         struct string_cat_parameter base;
         double num;
+        unsigned fraction;
 };
 
 static inline void
@@ -269,14 +307,40 @@ string_cat_parameter_double_cat(struct string_cat_parameter_double *p,
         struct string *s)
 {
         char var[128];
-        unsigned len = sprintf(var, "%f", p->num);
-        string_cat_chars(s, var, len);
+        char format[32];
+        sprintf(format, "%c.%df", '%', p->fraction);
+        unsigned len = sprintf(var, format, p->num);
+	string_cat_chars(s, var, len);
 }
 
-#define STRING_CAT_DOUBLE(n) (struct string_cat_parameter *)\
+static inline void
+string_cat_parameter_double_or_int_cat(struct string_cat_parameter_double *p,
+        struct string *s)
+{
+        char var[128];
+        char format[32];
+        if(p->num - (i64)p->num == 0 ) {
+                unsigned len = sprintf(var, "%"PRId64, (i64)p->num);
+	        string_cat_chars(s, var, len);
+        } else {
+        	sprintf(format, "%c.%df", '%', p->fraction);
+                unsigned len = sprintf(var, format, p->num);
+        	string_cat_chars(s, var, len);
+        }
+}
+
+#define STRING_CAT_DOUBLE(n, f) (struct string_cat_parameter *)\
 &(struct string_cat_parameter_double){\
         .base.cat = (string_cat_parameter_cat) string_cat_parameter_double_cat,\
-        .num = n\
+        .num = n,\
+        .fraction = f\
+}
+
+#define STRING_CAT_DOUBLE_OR_INT(n, f) (struct string_cat_parameter *)\
+&(struct string_cat_parameter_double){\
+        .base.cat = (string_cat_parameter_cat) string_cat_parameter_double_or_int_cat,\
+        .num = n,\
+        .fraction = f\
 }
 
 #endif

@@ -18,17 +18,10 @@ static void __write_string(struct json_string *p, struct string *ret)
 
 static void __write_number(struct json_number *p, struct string *ret)
 {
-	if(p->value - (i64)p->value != 0) {
-		string_cat(ret, 
-			STRING_CAT_DOUBLE(p->value),
-			NULL
-		);
-	} else {
-		string_cat(ret, 
-			STRING_CAT_I64((i64)p->value),
-			NULL
-		);
-	}
+	string_cat(ret, 
+		STRING_CAT_DOUBLE_OR_INT(p->value, 6),
+		NULL
+	);
 }
 
 static void __write_boolean(struct json_boolean *p, struct string *ret)

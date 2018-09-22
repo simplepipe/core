@@ -30,6 +30,8 @@ struct file *file_open(const char *path, char *mode)
         } else if(strncmp(path, "local://", sizeof("local://") - 1) == 0) {
                 p = &file_pc_new(path + sizeof("local://") - 1,
                         mode)->base;
+        } else {
+        	p = &file_pc_new(path, mode)->base;
         }
 
         return p;

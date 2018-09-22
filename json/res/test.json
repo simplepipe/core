@@ -1,7 +1,26 @@
 {
-	"Name" : "Me",
-	"Age"  : 27,
-	"Data" : [
-		1, 2, 3, 4, 5, "Content"
+	"seller": {
+		"name" : "",
+		"address" : ""
+	},
+	
+	"customer": {
+		"name" : "",
+		"taxcode" : "",
+		"address" : ""
+	},
+	
+	"date" : 1000000,
+	
+	"vat" : {
+		"symbol" : "",
+		"number" : "",
+		"date" : 123123
+	},
+	
+	"goods" : [
+		{
+			
+		}
 	]
 }
