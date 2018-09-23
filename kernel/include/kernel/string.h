@@ -24,6 +24,10 @@ struct string *string_cat_chars(struct string *p, const char *s,
 
 void string_trim_utf8(struct string *p);
 
+void string_replace(struct string *p, 
+	const char *from, const unsigned from_len,
+	const char *to, const unsigned to_len);
+
 /*
  * cat
  */

@@ -1,0 +1,7 @@
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/install/strip.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/install/local.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/physics.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/edit_cache.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/rebuild_cache.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/install.dir
+/home/manh/Documents/Projects/core/physics/build/droid/mips64/Release/CMakeFiles/list_install_components.dir

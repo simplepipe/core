@@ -99,3 +99,52 @@ struct string *string_cat(struct string *p,
         va_end(parg);
         return p;
 }
+
+static void __replace_in_place(struct string *p, const char *from, 
+	const char *to, const unsigned len)
+{
+	char *ptr;
+	ptr = p->ptr;
+	while((ptr = strstr(ptr, from))) {
+		memcpy(ptr, to, len);
+		ptr += len;
+	}
+}
+
+static void __replace_buffer(struct string *p, const char *from, const unsigned from_len,
+	const char *to, const unsigned to_len)
+{
+	struct string *buffer = string_new();
+	char *ptr, *str;
+	
+	string_cat_chars(buffer, p->ptr, p->len);
+	
+	p->len = 0;
+	p->ptr[0] = '\0';
+	
+	ptr = buffer->ptr;
+	str = ptr;
+	while((ptr = strstr(ptr, from))) {
+		if(ptr > str) string_cat_chars(p, str, ptr - str);
+		string_cat_chars(p, to, to_len);
+		ptr += from_len;
+		str = ptr;
+	}
+	if(str && *str) {
+		string_cat_chars(p, str, (buffer->ptr + buffer->len) - str);
+	}
+	
+	ref_dec(&buffer->base);
+	
+}
+
+void string_replace(struct string *p, 
+	const char *from, const unsigned from_len,
+	const char *to, const unsigned to_len)
+{
+	if(from_len == to_len) {
+		__replace_in_place(p, from, to, from_len);
+	} else {
+	 	__replace_buffer(p, from, from_len, to, to_len);
+	}
+}

@@ -12,6 +12,7 @@ BUILD[7]=collada
 BUILD[8]=action
 BUILD[9]=opengl
 BUILD[10]=gui
+BUILD[11]=physics
 
 for i in "${BUILD[@]}"
 do

@@ -1,0 +1,2 @@
+/home/manh/Documents/android-ndk-r17c/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ar qc libphysics.a  CMakeFiles/physics.dir/src/particle.c.o
+/home/manh/Documents/android-ndk-r17c/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64/bin/arm-linux-androideabi-ranlib libphysics.a

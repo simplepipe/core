@@ -1,0 +1,7 @@
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/install/strip.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/install/local.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/physics.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/edit_cache.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/rebuild_cache.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/install.dir
+/home/manh/Documents/Projects/core/physics/build/droid/armeabi-v7a/Debug/CMakeFiles/list_install_components.dir
