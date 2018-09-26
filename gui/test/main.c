@@ -221,7 +221,7 @@ static struct character *__get_character(const char *c)
 	return p;	
 }
 
-static void __draw_text_left(const char *text, const float x, const float y, const float scale, union vec3 color)
+static void __draw_text_left(const char *text, const float x, const float y, const float scale, const float width, union vec3 color)
 {
 	glUseProgram(game.shader->id);
 	glUniform3f(glGetUniformLocation(game.shader->id, "textColor"), color.x, color.y, color.z);
@@ -261,7 +261,7 @@ static void __draw_text_left(const char *text, const float x, const float y, con
 					if(c) {
 						xpos = lx + c->bearing_width * scale;
 						w = c->width * scale;
-						if(xpos + w > g_device.width - 6) {
+						if(xpos + w > width) {
 							yy -= game.face->size->metrics.height >> 6;
 							xx = x;
 							break;
@@ -316,152 +316,7 @@ static void __draw_text_left(const char *text, const float x, const float y, con
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-static void __draw_text_center(const char *text, const float x, const float y, const float scale, union vec3 color)
-{
-	glUseProgram(game.shader->id);
-	glUniform3f(glGetUniformLocation(game.shader->id, "textColor"), color.x, color.y, color.z);
-	glActiveTexture(GL_TEXTURE0);
-	glUniform1i(glGetUniformLocation(game.shader->id, "text"), 0);
-	glBindVertexArray(game.vao->id);
-	
-	float xx = x, yy = y;
-	unsigned check_count = 0;
-	float xpos, ypos, w, h;
-	float xoffset;
-	struct character *c;
-	
-	const char *ptr = text;
-	const char *lptr = NULL;
-	const char *lend = NULL;
-	const char *lprev = NULL;
-	const char *lprev_space = NULL;
-	while(*ptr) {
-		xoffset = 0;
-		if(lptr == NULL) {
-			lptr = ptr;
-			lprev = lptr;
-			w = x;
-			h = 0;
-			ypos = 0;
-			while(*lptr) {
-				c = __get_character(lptr);
-				if(c) {
-					switch(*lptr) {
-						case '\t':
-							xpos = (c->advance >> 6) * scale * 4; 
-							if(w + xpos > g_device.width - 6) {
-								lptr = lprev;
-								goto finish_check;
-							}
-							w += xpos;
-							if(isspace(*lprev) == 0) {
-								lprev_space = lptr;
-								ypos = w - xpos;
-							}
-							break;
-						case ' ': case '\v': case '\f': case '\r':
-							xpos = (c->advance >> 6) * scale; 
-							if(w + xpos > g_device.width - 6) {
-								lptr = lprev;
-								goto finish_check;
-							}
-							w += xpos;
-							if(isspace(*lprev) == 0) {
-								lprev_space = lptr;
-								ypos = w - xpos;
-							}
-							break;
-						case '\n':
-							goto finish_check;
-						default:
-							xpos = (c->advance >> 6) * scale; 
-							if(w + xpos > g_device.width - 6) {
-								lend = lptr + utf8_width(lptr);
-								if((*lend) 
-									&& ((isspace(*lend) == 0) || isspace(*lprev) == 0) 
-									&& lprev_space) {						
-									lptr = lprev_space;
-									h = ypos;
-								} else {
-									lptr = lprev;
-								}						
-								goto finish_check;
-							}
-							w += xpos;
-							h = w;
-							break;
-					}	
-				}
-				lend = lptr + utf8_width(lptr);
-				if(!*lend) {
-					break;
-				}
-				
-				lprev = lptr;
-				lptr = lend;
-			}
-		finish_check:
-			xoffset = floor((g_device.width - 6 - h) / 2);		
-		}
-		
-		c = __get_character(ptr);
-		if(!c) goto next;
-		
-		switch(*ptr) {
-			case '\t':
-				xx += (c->advance >> 6) * scale * 4 + xoffset;
-				goto next;
-			case '\n':
-				yy -= game.face->size->metrics.height >> 6;
-				xx = x;
-				goto next;
-			case ' ': case '\v': case '\f': case '\r':
-				xx += (c->advance >> 6) * scale + xoffset;
-				goto next;
-			default:
-				break;
-		}
-		
-		xpos = xx + c->bearing_width * scale + xoffset;
-		ypos = yy - (c->height - c->bearing_height) * scale;
-
-		w = c->width * scale;
-		h = c->height * scale;
-
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0, 0.0 },            
-			{ xpos,     ypos,       0.0, 1.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-
-			{ xpos,     ypos + h,   0.0, 0.0 },
-			{ xpos + w, ypos,       1.0, 1.0 },
-			{ xpos + w, ypos + h,   1.0, 0.0 }           
-		};
-		
-		glBindTexture(GL_TEXTURE_2D, c->texture->id);
-		glBindBuffer(GL_ARRAY_BUFFER, game.vbo->id);
-		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
-		glBindBuffer(GL_ARRAY_BUFFER, 0);
-		glDrawArrays(GL_TRIANGLES, 0, 6);
-		
-		xx += (c->advance >> 6) * scale + xoffset;
-		
-	next:
-		if(lptr && ptr >= lptr) {
-			if(*ptr != '\n') {
-				yy -= game.face->size->metrics.height >> 6;
-				xx = x;
-			}
-			lptr = NULL;
-		}
-	
-		ptr += utf8_width(ptr);
-	}
-	glBindVertexArray(0);
-	glBindTexture(GL_TEXTURE_2D, 0);
-}
-
-static void __draw_text_justified(const char *text, const float x, const float y, const float scale, union vec3 color)
+static void __draw_text_center(const char *text, const float x, const float y, const float scale, const float width, union vec3 color)
 {
 	glUseProgram(game.shader->id);
 	glUniform3f(glGetUniformLocation(game.shader->id, "textColor"), color.x, color.y, color.z);
@@ -505,7 +360,7 @@ static void __draw_text_justified(const char *text, const float x, const float y
 						case '\t':
 							if(lptr_start) {
 								xpos += (c->advance >> 6) * scale * 4; 
-								if(w + xpos > g_device.width - 6) {
+								if(w + xpos > width) {
 									if(lprev_space) {
 										lptr = lprev_space;
 										h = ypos;
@@ -531,7 +386,7 @@ static void __draw_text_justified(const char *text, const float x, const float y
 						case ' ': case '\v': case '\f': case '\r':
 							if(lptr_start) {
 								xpos += (c->advance >> 6) * scale; 
-								if(w + xpos > g_device.width - 6) {
+								if(w + xpos > width) {
 									if(lprev_space) {
 										lptr = lprev_space;
 										h = ypos;
@@ -571,11 +426,213 @@ static void __draw_text_justified(const char *text, const float x, const float y
 								space_count_temp = 0;
 							}
 							xtest = (c->advance >> 6) * scale; 
-							if(w + xpos + xtest > g_device.width - 6) {
-								lend = lptr + utf8_width(lptr);
-								if((*lend) 
-									&& ((isspace(*lend) == 0) || isspace(*lprev) == 0) 
-									&& lprev_space) {						
+							if(w + xpos + xtest > width) {
+								if(lprev_space) {						
+									lptr = lprev_space;
+									h = ypos;
+									lptr_stop = lptr;
+									space_count = space_count_prev;
+								} else {
+									lptr = lprev;
+									lptr_stop = lptr;
+								}						
+								goto finish_check;
+							}
+							w += xpos + xtest;
+							h = w;
+							xpos = 0;
+							space_count += space_count_temp;
+							space_count_temp = 0;
+							lptr_stop = lptr;
+							break;
+					}	
+					lprev = lptr;
+				}
+				lend = lptr + utf8_width(lptr);
+				if(!*lend) {
+					break;
+				}
+				lptr = lend;
+			}
+		finish_check:
+			xoffset = round((width - h) / 2);
+			space_count_temp = 0;					
+		}
+		
+		c = __get_character(ptr);
+		if(!c) goto next;
+		
+		if(lptr_start && ptr < lptr_start) goto next;
+		
+		if(lptr_stop && ptr > lptr_stop) goto next;
+		
+		switch(*ptr) {
+			case '\t':				
+				xx += (c->advance >> 6) * scale * 4;				
+				goto next;
+			case '\n':
+				yy -= game.face->size->metrics.height >> 6;
+				xx = x;
+				goto next;
+			case ' ': case '\v': case '\f': case '\r':				
+				xx += (c->advance >> 6) * scale;	
+				goto next;
+			default:
+				break;
+		}
+		
+		xpos = xx + c->bearing_width * scale + xoffset;
+		ypos = yy - (c->height - c->bearing_height) * scale;
+
+		w = c->width * scale;
+		h = c->height * scale;
+
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0, 0.0 },            
+			{ xpos,     ypos,       0.0, 1.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+
+			{ xpos,     ypos + h,   0.0, 0.0 },
+			{ xpos + w, ypos,       1.0, 1.0 },
+			{ xpos + w, ypos + h,   1.0, 0.0 }           
+		};
+		
+		glBindTexture(GL_TEXTURE_2D, c->texture->id);
+		glBindBuffer(GL_ARRAY_BUFFER, game.vbo->id);
+		glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
+		glDrawArrays(GL_TRIANGLES, 0, 6);
+		
+		xx += (c->advance >> 6) * scale + xoffset;
+		xoffset = 0;
+		
+	next:
+		if(lptr && ptr >= lptr) {
+			if(*ptr != '\n') {
+				yy -= game.face->size->metrics.height >> 6;
+				xx = x;
+			}
+			lptr = NULL;
+		}
+	
+		ptr += utf8_width(ptr);
+	}
+	glBindVertexArray(0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+static void __draw_text_justified(const char *text, const float x, const float y, const float scale, const float width, union vec3 color)
+{
+	glUseProgram(game.shader->id);
+	glUniform3f(glGetUniformLocation(game.shader->id, "textColor"), color.x, color.y, color.z);
+	glActiveTexture(GL_TEXTURE0);
+	glUniform1i(glGetUniformLocation(game.shader->id, "text"), 0);
+	glBindVertexArray(game.vao->id);
+	
+	float xx = x, yy = y;
+	unsigned check_count = 0;
+	float xpos, ypos, w, h, xtest;
+	float xoffset, xoffset_last;
+	int space_count, space_count_temp, space_count_prev;
+	struct character *c, *cbs;
+	
+	const char *ptr = text;
+	const char *lptr = NULL;
+	const char *lend = NULL;
+	const char *lprev = NULL;
+	const char *lprev_space = NULL;
+	const char *lptr_start, *lptr_stop;
+	xoffset = 0;
+	xoffset_last = 0;
+	while(*ptr) {
+		if(lptr == NULL) {
+			lptr = ptr;
+			lprev = lptr;
+			w = x;
+			h = 0;
+			ypos = 0;
+			xpos = 0;
+			space_count = 0;
+			space_count_temp = 0;
+			space_count_prev = 0;
+			lptr_start = NULL;
+			lptr_stop = NULL;
+			while(*lptr) {
+				xoffset = -1;
+				c = __get_character(lptr);
+				if(c) {
+					switch(*lptr) {
+						case '\t':
+							if(lptr_start) {
+								xpos += (c->advance >> 6) * scale * 4; 
+								if(w + xpos > width) {
+									if(lprev_space) {
+										lptr = lprev_space;
+										h = ypos;
+										lptr_stop = lptr;
+										space_count = space_count_prev;
+									} else {
+										lptr = lprev;
+									}								
+									goto finish_check;
+								}
+								space_count_temp++;
+								if(isspace(*lprev) == 0) {
+									lprev_space = lprev;
+									ypos = w;
+									space_count_prev = space_count;
+									
+									cbs = __get_character(lprev);
+									ypos -= (cbs->advance >> 6) * scale;
+									ypos += (cbs->bearing_width + cbs->width) * scale;
+								}
+							}
+							break;
+						case ' ': case '\v': case '\f': case '\r':
+							if(lptr_start) {
+								xpos += (c->advance >> 6) * scale; 
+								if(w + xpos > width) {
+									if(lprev_space) {
+										lptr = lprev_space;
+										h = ypos;
+										lptr_stop = lptr;
+										space_count = space_count_prev;
+									} else {
+										lptr = lprev;
+									}									
+									goto finish_check;
+								}
+								space_count_temp++;
+								if(isspace(*lprev) == 0) {
+									lprev_space = lprev;
+									ypos = w;
+									space_count_prev = space_count;
+									
+									cbs = __get_character(lprev);
+									ypos -= (cbs->advance >> 6) * scale;
+									ypos += (cbs->bearing_width + cbs->width) * scale;
+								}
+							}
+							
+							break;
+						case '\n':
+							xoffset = 1;
+							if(!lptr_start) {
+								lptr_start = lptr;
+								lptr_stop = lptr;
+							}
+							lptr_stop = lptr;
+							goto finish_check;
+						default:
+							if(!lptr_start) {
+								lptr_start = lptr;
+								lptr_stop = lptr;
+								xpos = 0;
+								space_count_temp = 0;
+							}
+							xtest = (c->advance >> 6) * scale; 
+							if(w + xpos + xtest > width) {
+								if(lprev_space) {						
 									lptr = lprev_space;
 									h = ypos;
 									lptr_stop = lptr;
@@ -604,8 +661,8 @@ static void __draw_text_justified(const char *text, const float x, const float y
 			}
 		finish_check:
 			if(xoffset < 0 && space_count) {				
-				xoffset = floor((g_device.width - 6 - h) / space_count);
-				xoffset_last = 	(g_device.width - 6 - h) - xoffset * (space_count - 1);
+				xoffset = floor((width - h) / space_count);
+				xoffset_last = 	(width - h) - xoffset * (space_count - 1);
 			} else {
 				xoffset = 0;
 				xoffset_last = 0;
@@ -624,11 +681,14 @@ static void __draw_text_justified(const char *text, const float x, const float y
 		switch(*ptr) {
 			case '\t':				
 				space_count_temp++;			
-				if(space_count_temp < space_count) {
+				if(space_count_temp < space_count) {					
 					xx += (c->advance >> 6) * scale * 4 + xoffset;
+					if(xoffset_last > xoffset && xoffset_last > 1) {
+						xx++;
+						xoffset_last--;
+					}
 				} else {
 					xx += (c->advance >> 6) * scale * 4 + xoffset_last;
-					printf("last\n");
 				}	
 				
 				goto next;
@@ -640,9 +700,12 @@ static void __draw_text_justified(const char *text, const float x, const float y
 				space_count_temp++;
 				if(space_count_temp < space_count) {
 					xx += (c->advance >> 6) * scale + xoffset;
+					if(xoffset_last > xoffset && xoffset_last > 1) {
+						xx++;
+						xoffset_last--;
+					}
 				} else {
 					xx += (c->advance >> 6) * scale + xoffset_last;
-					printf("last\n");
 				}	
 				goto next;
 			default:
@@ -702,8 +765,8 @@ static void __draw()
         glClear(GL_COLOR_BUFFER_BIT);
         
         if(game.test_ptr && *game.test_ptr) {
-        	__draw_text_justified(game.test_ptr, 6, g_device.height - (game.face->size->metrics.height >> 6), 
-        		1.0f, (union vec3){0, 0, 0});
+        	__draw_text_left(game.test_ptr, 5, g_device.height - (game.face->size->metrics.height >> 6), 
+        		1.0f, g_device.width - 5, (union vec3){0, 0, 0});
         }           
 
         if(pass->end) {
