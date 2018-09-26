@@ -1,0 +1,9 @@
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/install/strip.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/install/local.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/rebuild_cache.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/install.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/list_install_components.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/freetype.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/package.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/package_source.dir
+/home/manh/Documents/freetype-2.9.1/build/CMakeFiles/edit_cache.dir

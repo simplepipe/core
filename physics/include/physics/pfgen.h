@@ -5,6 +5,8 @@
 
 struct particle_force_generator {
         struct ref base;
+        
+        void(*update)(struct particle *, float duration);
 };
 
 struct particle_force_registry {

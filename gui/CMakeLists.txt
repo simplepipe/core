@@ -66,6 +66,13 @@ set_target_properties(
         IMPORTED_LOCATION "${LIBRARY_INPUT}/libcups.a"
 )
 
+add_library(freetype STATIC IMPORTED)
+set_target_properties(
+        freetype
+        PROPERTIES
+        IMPORTED_LOCATION "${LIBRARY_INPUT}/libfreetype.a"
+)
+
 include_directories(include)
 include_directories(../math/include)
 include_directories(../kernel/include)
@@ -74,6 +81,7 @@ include_directories(../jpeg/include)
 include_directories(../zip/include)
 include_directories(../opengl/include)
 include_directories(../cups/include)
+include_directories(../freetype/include)
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Android")
         set(OPENGL_LINK GLESv3 EGL z)
@@ -120,9 +128,14 @@ install (TARGETS gui
          ARCHIVE DESTINATION .)
 
  if(NOT ${CMAKE_GENERATOR} MATCHES Xcode
-        AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android"
-        AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+        AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "Android")
+         if (${CMAKE_SYSTEM_NAME} MATCHES "Emscripten")
+                set(CMAKE_EXECUTABLE_SUFFIX ".html")
+                set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -s USE_SDL=2 --use-preload-plugins --preload-file ../../../data@")
+        else()
+                set(OPENGL_LINK ${OPENGL_LINK} SDL2)
+        endif()
         add_executable(test "test/main.c")
-        add_dependencies(test cups gui opengl kernel pthread zip jpeg png ${OPENGL_LINK})
-        target_link_libraries(test cups gui opengl kernel pthread zip jpeg png ${OPENGL_LINK})
+        add_dependencies(test freetype cups gui opengl kernel pthread zip jpeg png ${OPENGL_LINK})
+        target_link_libraries(test freetype cups gui opengl kernel pthread zip jpeg png ${OPENGL_LINK})
  endif()
