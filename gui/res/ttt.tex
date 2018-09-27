@@ -1,0 +1,41 @@
+\documentclass[12pt]{article}
+\usepackage{geometry}
+\geometry{
+ a4paper,
+ top=0mm,
+ left=0mm,
+ right=0mm,
+ bottom=0mm
+}
+\usepackage[absolute,overlay]{textpos}%
+\usepackage[utf8]{vietnam}%
+\usepackage{times}%
+\usepackage{tikz}%
+
+\newcommand\p[3]{%
+\begin{flushleft}%
+\begin{textblock*}{0pt}(#1pt,#2pt)%
+#3%
+\end{textblock*}%
+\end{flushleft}%
+}%
+%
+\begin{document}%
+\pagenumbering{gobble}%
+
+\p{0}{0}{X}%
+\p{9}{0}{i}%
+\p{12}{0}{n}%
+\p{18}{0}{\ }%
+\p{21}{0}{c}%
+\p{26}{0}{h}%
+\p{32}{0}{à}%
+\p{37}{0}{o}%
+
+\begin{flushleft}%
+\begin{textblock*}{0pt}(0pt,2pt)%
+\tikz \fill [black] (0.0,0.0) rectangle (43pt, 0.75pt);%
+\end{textblock*}%
+\end{flushleft}%
+
+\end{document}

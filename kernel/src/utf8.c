@@ -13,7 +13,7 @@ struct head {
 
 u8 utf8_width(const char *c)
 {
-        const struct head *head = (struct head *)c;
+        const struct head *head = (const struct head *)c;
         if(head->bit_0 == 0)
                 return 1;
         else {
@@ -29,6 +29,22 @@ u8 utf8_width(const char *c)
         }
 
         return 1;
+}
+
+u8 utf8_prev_width(const char *c)
+{
+	const struct head *head;
+	u8 count = 0;
+prev:
+	c--;
+	count++;
+	head = (const struct head *)c;
+	if(head->bit_1 == 1 && head->bit_2 == 0) {
+		goto prev;
+	}
+	
+	return count;
+	
 }
 
 u32 utf8_code(const u8 *c_ptr, u8 width)

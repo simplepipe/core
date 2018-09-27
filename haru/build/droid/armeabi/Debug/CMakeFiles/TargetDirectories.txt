@@ -1,0 +1,7 @@
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/install/strip.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/install/local.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/edit_cache.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/rebuild_cache.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/install.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/haru.dir
+/home/manh/Documents/Projects/core/haru/build/droid/armeabi/Debug/CMakeFiles/list_install_components.dir

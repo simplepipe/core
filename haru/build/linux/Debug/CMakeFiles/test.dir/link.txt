@@ -1,0 +1,1 @@
+/usr/bin/cc  -Werror -g  -rdynamic CMakeFiles/test.dir/test/main.c.o  -o test libharu.a /home/manh/Documents/Projects/core/build/linux/debug/libkernel.a /home/manh/Documents/Projects/core/build/linux/debug/libzip.a /home/manh/Documents/Projects/core/build/linux/debug/libpng.a -lm -lz -lm 

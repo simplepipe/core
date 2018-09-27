@@ -44,5 +44,4 @@ struct pass_texture *pass_texture_init(struct pass_texture *p,
         const unsigned depth, const unsigned stencil,
         const unsigned msaa);
 void pass_texture_release(struct pass_texture *p);
-
 #endif
