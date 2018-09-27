@@ -1,7 +1,0 @@
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/install/strip.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/install/local.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/edit_cache.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/rebuild_cache.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/install.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/haru.dir
-/home/manh/Documents/Projects/core/haru/build/droid/arm64-v8a/Release/CMakeFiles/list_install_components.dir

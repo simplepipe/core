@@ -1,1 +1,0 @@
-/home/manh/Documents/Projects/core/build/droid/x86_64/debug/./libharu.a

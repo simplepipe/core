@@ -1,1 +1,0 @@
-/home/manh/Documents/Projects/core/build/linux/debug/./libharu.a
